@@ -37,11 +37,20 @@ namespace Redis_Elasticsearch.Controllers
         [HttpGet("{id}")]
         public ActionResult<Student> Get(int id)
         {
-            var serializedStudent = distributedCache.GetString(id.ToString());
-            if (serializedStudent != null)
+            IDatabase db = multiplexer.GetDatabase();
+            var entries = db.HashGetAll(id.ToString());
+            string name = null, surname = null;
+
+            if (entries.Length > 0)
             {
-                var deserializedStudent = JsonConvert.DeserializeObject<Student>(serializedStudent);
-                return deserializedStudent;
+                foreach (var item in entries)
+                {
+                    if (item.Name == "name")
+                        name = item.Value;
+                    else
+                        surname = item.Value;
+                }
+                return new Student(id, name, surname);
             }
             else
                 return null;
@@ -57,14 +66,20 @@ namespace Redis_Elasticsearch.Controllers
             //...
             //...
             //...
-            if (distributedCache.Get(newId.ToString()) == null)
+            IDatabase db = multiplexer.GetDatabase();
+
+            if (db.HashKeys(newId.ToString()).Length == 0)
             {
-                var newStudent = new Student(newId, student.Name, student.Surname);
-                var serializedStudent = JsonConvert.SerializeObject(newStudent);
-                distributedCache.SetString(newId.ToString(), serializedStudent);
+                HashEntry[] studentHashEntries =
+                {
+                    new HashEntry("name", student.Name),
+                    new HashEntry("surname", student.Surname)
+                };
+                db.HashSet(newId.ToString(), studentHashEntries);
+                return newId;
             }
-            var arr = distributedCache.Get(newId.ToString());
-            return newId;
+            else
+                return 0;
         }
 
         // PUT api/values/5
