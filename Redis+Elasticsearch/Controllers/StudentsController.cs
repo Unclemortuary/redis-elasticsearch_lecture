@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json;
 using Redis_Elasticsearch.Models;
 using StackExchange.Redis;
 
@@ -36,7 +37,14 @@ namespace Redis_Elasticsearch.Controllers
         [HttpGet("{id}")]
         public ActionResult<Student> Get(int id)
         {
-            return memoryCache.Get<Student>(id);
+            var serializedStudent = distributedCache.GetString(id.ToString());
+            if (serializedStudent != null)
+            {
+                var deserializedStudent = JsonConvert.DeserializeObject<Student>(serializedStudent);
+                return deserializedStudent;
+            }
+            else
+                return null;
         }
 
         // POST api/values
@@ -49,10 +57,13 @@ namespace Redis_Elasticsearch.Controllers
             //...
             //...
             //...
-            if (!memoryCache.TryGetValue(newId, out Student cachedStudent))
+            if (distributedCache.Get(newId.ToString()) == null)
             {
-                memoryCache.Set(newId, new Student(newId, student.Name, student.Surname));
+                var newStudent = new Student(newId, student.Name, student.Surname);
+                var serializedStudent = JsonConvert.SerializeObject(newStudent);
+                distributedCache.SetString(newId.ToString(), serializedStudent);
             }
+            var arr = distributedCache.Get(newId.ToString());
             return newId;
         }
 
