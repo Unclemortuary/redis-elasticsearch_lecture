@@ -8,6 +8,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using Redis_Elasticsearch.Models;
 using StackExchange.Redis;
+using Redis_Elasticsearch.Helpers;
 
 namespace Redis_Elasticsearch.Controllers
 {
@@ -37,7 +38,8 @@ namespace Redis_Elasticsearch.Controllers
         [HttpGet("{id}")]
         public ActionResult<Student> Get(int id)
         {
-            IDatabase db = multiplexer.GetDatabase();
+            IDatabase db = RedisConnectionHelper.Connection.GetDatabase();
+
             var entries = db.HashGetAll(id.ToString());
             string name = null, surname = null;
 
@@ -66,7 +68,7 @@ namespace Redis_Elasticsearch.Controllers
             //...
             //...
             //...
-            IDatabase db = multiplexer.GetDatabase();
+            IDatabase db = RedisConnectionHelper.Connection.GetDatabase();
 
             if (db.HashKeys(newId.ToString()).Length == 0)
             {
