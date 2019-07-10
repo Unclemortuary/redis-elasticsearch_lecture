@@ -16,14 +16,12 @@ namespace Redis_Elasticsearch.Controllers
     public class StudentsController : ControllerBase
     {
         private readonly IMemoryCache memoryCache;
-        private readonly IDistributedCache distributedCache;
 
         private static readonly ConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect("localhost");
 
-        public StudentsController(IMemoryCache memoryCache, IDistributedCache distributedCache)
+        public StudentsController(IMemoryCache memoryCache)
         {
             this.memoryCache = memoryCache;
-            this.distributedCache = distributedCache;
         }
 
         // GET api/values
@@ -62,14 +60,15 @@ namespace Redis_Elasticsearch.Controllers
         {
             var random = new Random();
             int newId = random.Next();
-            //compex calculations
-            //...
-            //...
-            //...
+            
             IDatabase db = multiplexer.GetDatabase();
 
             if (db.HashKeys(newId.ToString()).Length == 0)
             {
+                //compex calculations
+                //...
+                //...
+                //...
                 HashEntry[] studentHashEntries =
                 {
                     new HashEntry("name", student.Name),
