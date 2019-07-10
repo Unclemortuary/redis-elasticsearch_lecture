@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
-using Newtonsoft.Json;
 using Redis_Elasticsearch.Models;
 using StackExchange.Redis;
-using Redis_Elasticsearch.Helpers;
+using Redis_Elasticsearch.Infrastructure;
 
 namespace Redis_Elasticsearch.Controllers
 {
@@ -16,15 +11,11 @@ namespace Redis_Elasticsearch.Controllers
     [ApiController]
     public class StudentsController : ControllerBase
     {
-        private readonly IMemoryCache memoryCache;
-        private readonly IDistributedCache distributedCache;
+        private readonly IRedisConnectivity redis;
 
-        private static readonly ConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect("localhost");
-
-        public StudentsController(IMemoryCache memoryCache, IDistributedCache distributedCache)
+        public StudentsController(IRedisConnectivity redis)
         {
-            this.memoryCache = memoryCache;
-            this.distributedCache = distributedCache;
+            this.redis = redis;
         }
 
         // GET api/values
@@ -38,7 +29,7 @@ namespace Redis_Elasticsearch.Controllers
         [HttpGet("{id}")]
         public ActionResult<Student> Get(int id)
         {
-            IDatabase db = RedisConnectionHelper.Connection.GetDatabase();
+            IDatabase db = redis.Multiplexer.GetDatabase();
 
             var entries = db.HashGetAll(id.ToString());
             string name = null, surname = null;
@@ -68,7 +59,7 @@ namespace Redis_Elasticsearch.Controllers
             //...
             //...
             //...
-            IDatabase db = RedisConnectionHelper.Connection.GetDatabase();
+            IDatabase db = redis.Multiplexer.GetDatabase();
 
             if (db.HashKeys(newId.ToString()).Length == 0)
             {

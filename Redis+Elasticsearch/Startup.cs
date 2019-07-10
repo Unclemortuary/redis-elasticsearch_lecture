@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Redis_Elasticsearch.Infrastructure;
 
 namespace Redis_Elasticsearch
 {
@@ -26,11 +27,7 @@ namespace Redis_Elasticsearch
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            //services.AddMemoryCache();
-            services.AddDistributedRedisCache(options =>
-            {
-                options.Configuration = "localhost";
-            });
+            services.AddSingleton<IRedisConnectivity, RedisConnectivity>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
