@@ -26,11 +26,7 @@ namespace Redis_Elasticsearch
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            //services.AddMemoryCache();
-            services.AddDistributedRedisCache(options =>
-            {
-                options.Configuration = "localhost";
-            });
+            services.AddMemoryCache();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
