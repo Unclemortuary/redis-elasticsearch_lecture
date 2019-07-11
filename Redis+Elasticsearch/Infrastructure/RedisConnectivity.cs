@@ -8,8 +8,6 @@ namespace Redis_Elasticsearch.Infrastructure
 {
     internal class RedisConnectivity : IRedisConnectivity
     {
-        public ConnectionMultiplexer Multiplexer => multiplexer;
-
-        private static readonly ConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect("localhost");
+        public ConnectionMultiplexer Multiplexer { get; } = ConnectionMultiplexer.Connect("localhost");
     }
 }
